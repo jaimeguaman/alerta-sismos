@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="es">
+	<head>
+		<title>Alerta Sismos</title>
+		<meta charset="utf-8">
+		<link href='http://fonts.googleapis.com/css?family=Archivo+Narrow:400,700|Amaranth' rel='stylesheet' type='text/css'>
+		<link href="stylesheets/app.less?23122012" media="screen" rel="stylesheet/less" type="text/css">
+		<script type="text/javascript" src="javascripts/less-1.3.0.min.js"></script>
+		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+	</head>
+	<body>
+		<header id="header" class="row">
+			<div class="grid-16">
+				<a href="#"><h1>Alerta Sismos <span><sup>beta</sup></span></h1></a>
+			</div>
+			<div class="fb-like" data-href="http://guaman-dev.cl/labs/sismos" data-send="false" data-layout="button_count" data-width="250" data-show-faces="true" data-colorscheme="dark" data-action="like"></div>
+		</header>
+		<section id="mapa">
+			<div id="map_canvas">
+				//soy el mapa soy el mapa soy el mapa ♪♪
+			</div>
+		</section>
+		<div class="contenedor">
+			<section id="lista-sismos-shile" class=" lista grid-8">
+				<!-- Lista de ultimos sismos en shile-->
+
+				<div class="lista-descripcion">
+					<h2>Ultimos sismos en Chile</h2>
+					<p>
+						la información proviene de: <a href="http://jaimeguaman.opendata.junar.com/datastreams/75075/sismos-chile">Junar (Sismología U. de Chile)</a>
+					</p>
+					<p>
+						Medición: Richter (ML)
+					</p>
+				</div>
+				<ul id="ultimos-sismos-shile" class="t-menu grid-16">
+					<!--ACA VAN LOS DATOS-->
+				</ul>
+			</section>
+			<section id="lista-sismos-mundo" class=" lista grid-8" >
+				<!-- Lista de ultimos sismos en el mundo-->
+				<div class="lista-descripcion">
+					<h2>Ultimos sismos en el mundo</h2>
+					<p>
+						la información proviene de: <a href="http://earthquake.usgs.gov/earthquakes/feed/">USGS</a>
+					</p>
+					<p>
+						Medición: Magnitud de momento (MW)
+					</p>
+				</div>
+				<ul id="ultimos-sismos-mundo" class="t-menu grid-16">
+					<!--ACA VAN LOS DATOS-->
+				</ul>
+			</section>
+		</div>
+		<footer class="row">
+			<p>
+				2012, Jaime Guaman.
+			</p>
+			<a href="https://github.com/jaimeguaman/alerta-sismos">GitHub</a>
+			<a href="http://guaman.cl/labs/sismos/">Así comenzó esto...</a>
+		</footer>
+		<div id="fb-root"></div>
+		<script>
+			( function(d, s, id) {
+					var js, fjs = d.getElementsByTagName(s)[0];
+					if (d.getElementById(id))
+						return;
+					js = d.createElement(s);
+					js.id = id;
+					js.src = "//connect.facebook.net/es_LA/all.js#xfbml=1";
+					fjs.parentNode.insertBefore(js, fjs);
+				}(document, 'script', 'facebook-jssdk'));
+		</script>
+
+		<script type="text/javascript" src="https://maps.google.com/maps/api/js?sensor=false"></script>
+		<script type="text/javascript" src="javascripts/app.js"></script>
+		<script type="text/javascript">
+			var _gaq = _gaq || [];
+			_gaq.push(['_setAccount', 'UA-27439178-1']);
+			_gaq.push(['_trackPageview']);
+
+			(function() {
+				var ga = document.createElement('script');
+				ga.type = 'text/javascript';
+				ga.async = true;
+				ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+				var s = document.getElementsByTagName('script')[0];
+				s.parentNode.insertBefore(ga, s);
+			})();
+		</script>
+	</body>
+</html>
