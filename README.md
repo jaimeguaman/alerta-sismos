@@ -1,4 +1,4 @@
-últimos sismos en chile y el mundo
+ï¿½ltimos sismos en chile y el mundo
 
 los datos son obtenidos desde
 
@@ -8,6 +8,7 @@ mundo: USGS -> http://earthquake.usgs.gov/earthquakes/feed
 por medio de un script sencillo que obtiene, cachea y devuelve datos
 de diferentes servicios/api (pendiente publicar :P)
 
+http://guaman.cl/app/alerta-sismos
 
 *css no compilado
 usa Perkins Less Framework 2
