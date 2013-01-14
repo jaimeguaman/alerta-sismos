@@ -306,19 +306,21 @@ $(document).on('ready',function(){
 		var parcheMes = null;
 		var params=new Array();
 		if(info.origen==='USGS'){
+			//TO-DO: Refactorizar. no usar $ each a no ser que sea una colección de objetos yikueri.
 			$.each(datos.features, function(e, evento) {
-				//limitador torpe, optimizar
-					cuando = new Date(evento.properties.time * 1000);
+				//BUGFIX, USGS está entregando timestamps de 13 caracteres, año 45007
+					var dateLength=evento.properties.time.length;
+					cuando = new Date(evento.properties.time.substring(0,dateLength - 3) * 1000);
 					parcheMes = cuando.getMonth() + 1;
 					//params: id, date, time, latitude, longitude, isOficial, nearOf, magnitude, depth
 					params={
 						id:evento.id,
 						hora:cuando.getHours() + ':' + cuando.getMinutes() + ':' + cuando.getSeconds(),
-						fecha:cuando.getDate() + '/' + parcheMes + '/' + cuando.getFullYear(),
+						fecha:dateFormat(cuando,'dd/mm/yyyy'),
 						latitude:evento.geometry.coordinates[1],
 						longitude:evento.geometry.coordinates[0],
 						nearOfCity:evento.properties.place,
-						magnitude:evento.properties.mag,
+						magnitude:evento.properties.mag, 
 						depth:evento.geometry.coordinates[2],
 						url:evento.properties.url
 					};
