@@ -176,8 +176,15 @@ var Mapa = function () {
         this.gMarkers.push(marker);
         return marker;
     }
-
-
+	this.markersVisible=function(id_max){
+		for (i=0;i < this.gMarkers.length;i++){
+			if (id_max >= this.gMarkers[i].nombre){
+				this.gMarkers[i].setVisible(true);
+			}else{
+				this.gMarkers[i].setVisible(false);	
+			}
+		}
+	}
     //inicializar entorno de objeto
     this.init = function (mapaOptions, $contenedor) {
 		/*
@@ -203,6 +210,10 @@ var App=function(opciones){
 	this.sismos=new Array();
 	this.mapa=new Mapa();
 	
+	//lazy controls
+	this.loads=opciones.loads;
+	this.done=0;
+	
 	this.init=function(listas){
 		var server='http://guaman.cl';
 		var port='80';
@@ -211,7 +222,8 @@ var App=function(opciones){
             maxZoom: 20,
             minZoom: 2,
             streetViewControl: false,
-            mapTypeId: google.maps.MapTypeId.TERRAIN
+            mapTypeId: google.maps.MapTypeId.TERRAIN,
+            mapTypeControl:false
         };
         this.mapa.init(opcionesMapa,opciones.contenedorMapa);
  		this.mapa.centrar(new google.maps.LatLng(0,0));
@@ -235,9 +247,21 @@ var App=function(opciones){
 
 		
 	}
+	this.getSismos=function(){
+		var ret=new Array();
+		var that=this;
+		for(i=0; i < this.sismos.length;i++){
+			ret.push(this.sismos[i].lista.obtieneTodos());
+		}
+		return ret;
+	}
+	this.getMapa=function(){
+		return this.mapa;
+	}
 	this.getDatos=function(){
 		var self=new Array();
 		var info=new Array();
+		this.done++;
 		for (n =0;n < this.sismos.length; n++){
 			self[n]=this.sismos[n];
 			this.sismos[n].cliente.obtieneDatos(this.sismos[n].script,this.sismos[n].params,'jsonp',n,function(n,datos){
@@ -245,7 +269,9 @@ var App=function(opciones){
 				info={
 					nombre:self[n].nombre,
 					origen:self[n].origen,
-					contenedor:self[n].contenedor
+					contenedor:self[n].contenedor,
+					done:this.done,
+					loads:this.loads
 				};
 				self[n].procesa(self[n].lista,info,datos,self[n].render);
 			});
@@ -262,7 +288,7 @@ var App=function(opciones){
 			html+='</div>';
 			this.mapa.crearMarker(
 				new google.maps.LatLng(sismos[n].latitude,sismos[n].longitude),
-				'nuevo' + n,
+				sismos[n].id,
 				html,
 				sismos[n].fecha + ' / ' + sismos[n].magnitude,
 				null,
@@ -276,7 +302,7 @@ var App=function(opciones){
 //start da party ;)
 $(document).on('ready',function(){
 	var listas=new Array();
-
+	var todos=new Array();
 	//sismos en chile
 	listas.push({
 		nombre:'chile',
@@ -298,23 +324,27 @@ $(document).on('ready',function(){
 		callbackProcesa:procesaDatos,
 		callbackRender:render,	
 	});
-	var sismo=new App({contenedorMapa:$('#map_canvas')});
+	var sismo=new App({contenedorMapa:$('#map_canvas'),loads:listas.length});
 	sismo.init(listas);
 	sismo.getDatos();
 	
 	function procesaDatos(listaSismos,info,datos,callback){
 		var parcheMes = null;
 		var params=new Array();
+		var fechaISO,fechaUNIX,dateLength,parcheFecha;
+			
 		if(info.origen==='USGS'){
 			//TO-DO: Refactorizar. no usar $ each a no ser que sea una colección de objetos yikueri.
 			$.each(datos.features, function(e, evento) {
+				dateLength=evento.properties.time.length;
+				parcheFecha=evento.properties.time.substring(0,dateLength - 3);
+				
 				//BUGFIX, USGS está entregando timestamps de 13 caracteres, año 45007
-					var dateLength=evento.properties.time.length;
-					cuando = new Date(evento.properties.time.substring(0,dateLength - 3) * 1000);
+					cuando = new Date(parcheFecha * 1000);
 					parcheMes = cuando.getMonth() + 1;
 					//params: id, date, time, latitude, longitude, isOficial, nearOf, magnitude, depth
 					params={
-						id:evento.id,
+						id:parcheFecha, //to-do: debe ser id único.
 						hora:cuando.getHours() + ':' + cuando.getMinutes() + ':' + cuando.getSeconds(),
 						fecha:dateFormat(cuando,'dd/mm/yyyy'),
 						latitude:evento.geometry.coordinates[1],
@@ -332,10 +362,13 @@ $(document).on('ready',function(){
 		if(info.origen==='JUNAR'){
 			var params=new Array();
 			var url=null;
-			//omitir los primeros 18, 9 en blanco, 9 descripción de las columnas ;)
 			for (var i=datos.result.fArray.length -9; i > 17 ;i -= 9){
+				fechaISO=dateFormat(datos.result.fArray[i].fStr,"yyyy-mm-dd'T'HH:MM:ss");
+				fechaISO=new Date(fechaISO);
+				fechaUNIX=parseInt(fechaISO.getTime() / 1000);
+				
 				params.push({
-					id:'sismo-shile' + i,
+					id:fechaUNIX,
 					hora:dateFormat(datos.result.fArray[i].fStr,'H:MM:ss'),
 					fecha:dateFormat(datos.result.fArray[i].fStr,'dd/mm/yyyy'),
 					latitude:datos.result.fArray[i + 1].fStr,
@@ -343,14 +376,16 @@ $(document).on('ready',function(){
 					nearOfCity:datos.result.fArray[i + 8].fStr,
 					magnitude:datos.result.fArray[i + 4].fStr,
 					depth:datos.result.fArray[i + 3].fStr,
-					url:'#'
-									
-				});				
+					url:'#'					
+				});		
 			}
 			//LIFO
 			for (var i=params.length -1;i >= 0; i-=1){
 				listaSismos.agrega(params[i]);	
 			}
+		}
+		if (info.done == info.loads){
+			iniciaSlider();
 		}
 		callback(listaSismos.obtieneTodos(),info.contenedor);
 		
@@ -380,6 +415,31 @@ $(document).on('ready',function(){
 			});
 			sismo.geolocaliza(datos);
 	}
+
+	function iniciaSlider(){
+		var ds=sismo.getSismos();
+		var is=new Array();
+		var fechamax=0,fechamin=0;
+		for (i=0;i< ds.length;i++){
+			for(j=0;j < ds[i].length;j++){
+				is.push(ds[i][j].id);
+			}
+		}
+		fechamax=Math.max.apply(Math,is);
+		fechamin=Math.min.apply(Math,is);
+		$("#slider").slider({
+			range: "max",
+			min: fechamin,
+			max: fechamax,
+			value: fechamax,
+			slide: function( event, ui ) {
+					$('#fecha-slider').text(dateFormat(new Date(ui.value * 1000),"dd/mm/yyyy - HH:MM:ss" ));
+					sismo.getMapa().markersVisible(ui.value);				
+			}
+		}); 	
+		$('#fecha-slider').text(dateFormat(new Date(fechamax * 1000),"dd/mm/yyyy - HH:MM:ss" ) + ' (controla los sismos que se muestran en el mapa, moviendo el slider)');
+	}
+
 });
 
 
