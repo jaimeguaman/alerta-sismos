@@ -308,7 +308,7 @@ $(document).on('ready',function(){
 		nombre:'chile',
 		contenedor:'#ultimos-sismos-shile',
 		script:'social2.php',
-		params:'r=junar&m=datos&s=byGUID&b=SISMO-CHILE&callback=?',
+		params:'r=junar&m=datos&s=byGUID&b=SISMO-CHILE-62403&callback=?',
 		origen:'JUNAR',
 		callbackProcesa:procesaDatos,
 		callbackRender:render,	
@@ -362,20 +362,20 @@ $(document).on('ready',function(){
 		if(info.origen==='JUNAR'){
 			var params=new Array();
 			var url=null;
-			for (var i=datos.result.fArray.length -9; i > 17 ;i -= 9){
-				fechaISO=dateFormat(datos.result.fArray[i].fStr,"yyyy-mm-dd'T'HH:MM:ss");
+			for (var i=datos.result.fArray.length -1; i > 7 ;i -= 8){
+				fechaISO=dateFormat(datos.result.fArray[i-7].fStr,"yyyy-mm-dd'T'HH:MM:ss");
 				fechaISO=new Date(fechaISO);
 				fechaUNIX=parseInt(fechaISO.getTime() / 1000);
 				
 				params.push({
 					id:fechaUNIX,
-					hora:dateFormat(datos.result.fArray[i].fStr,'H:MM:ss'),
-					fecha:dateFormat(datos.result.fArray[i].fStr,'dd/mm/yyyy'),
-					latitude:datos.result.fArray[i + 1].fStr,
-					longitude:datos.result.fArray[i + 2].fStr,
-					nearOfCity:datos.result.fArray[i + 8].fStr,
-					magnitude:datos.result.fArray[i + 4].fStr,
-					depth:datos.result.fArray[i + 3].fStr,
+					hora:dateFormat(datos.result.fArray[i-7].fStr,'H:MM:ss'),
+					fecha:dateFormat(datos.result.fArray[i-7].fStr,'dd/mm/yyyy'),
+					latitude:datos.result.fArray[i -5].fStr,
+					longitude:datos.result.fArray[i - 4].fStr,
+					nearOfCity:datos.result.fArray[i].fStr,
+					magnitude:datos.result.fArray[i-2].fStr,
+					depth:datos.result.fArray[i-3].fStr,
 					url:'#'					
 				});		
 			}
