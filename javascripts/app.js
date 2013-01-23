@@ -374,7 +374,7 @@ $(document).on('ready',function(){
 					latitude:datos.result.fArray[i -5].fStr,
 					longitude:datos.result.fArray[i - 4].fStr,
 					nearOfCity:datos.result.fArray[i].fStr,
-					magnitude:datos.result.fArray[i-2].fStr,
+					magnitude:parseFloat(datos.result.fArray[i-2].fStr),
 					depth:datos.result.fArray[i-3].fStr,
 					url:'#'					
 				});		
