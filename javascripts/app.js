@@ -1,3 +1,9 @@
+/**
+Código rudimentario y que nunca optimizé, deberían haber objetos en lugar de arreglos y un montón
+de optimizaciones más, pero que cuando tenga tiempo publicaré la próxima versión que será
+más útil que la actual :)
+*/
+
 var Cliente = function (serverHost, serverPort) {
 	var puertoServidor = serverPort;
     var hostServidor = serverHost;
@@ -68,6 +74,7 @@ var Sismos = function() {
 			id : params.id,
 			hora : params.fecha,
 			fecha : params.hora,
+			unixts : params.unixts,
 			latitude : params.latitude,
 			longitude : params.longitude,
 			isOficial : params.isOficial,
@@ -143,7 +150,7 @@ var Mapa = function () {
     this.crearMarker = function (posicion, nombre, html, titulo, icono, arrastrable) {
 
         var thisMapa = mapa.googleMap;
-        //var cat = this.gIcons[categoria];
+
 		var options={
 			position:posicion,
 			title:titulo,
@@ -151,7 +158,7 @@ var Mapa = function () {
 			map:thisMapa
 		}
 		if (icono != null){
-			options.icon=icono;
+			options.icon=this.gIcons[icono];
 		}
         var marker = new google.maps.Marker(options);
        // marker.categoria = categoria;
@@ -187,12 +194,15 @@ var Mapa = function () {
 	}
     //inicializar entorno de objeto
     this.init = function (mapaOptions, $contenedor) {
-		/*
-        this.gIcons.leve = "../images/MapsIcons/m-leve.png";
-        this.gIcons.medio = "../images/MapsIcons/m-medio.png";
-        this.gIcons.fuerte = "../images/MapsIcons/m-fuerte.png";
-        this.gIcons.mega = "../images/MapsIcons/m-mega.png";
-		*/
+		this.gIcons.i2 = "images/marker-icon/2.png";
+        this.gIcons.i3 = "images/marker-icon/3.png";
+        this.gIcons.i4 = "images/marker-icon/4.png";
+        this.gIcons.i5 = "images/marker-icon/5.png";
+        this.gIcons.i6 = "images/marker-icon/6.png";
+        this.gIcons.i7 = "images/marker-icon/7.png";
+        this.gIcons.i8= "images/marker-icon/8.png";
+        this.gIcons.i9= "images/marker-icon/9.png";
+		
         mapa.options = mapaOptions
         mapa.googleMap = new google.maps.Map($contenedor.get(0), mapa.options);
 
@@ -218,7 +228,7 @@ var App=function(opciones){
 		var server='http://guaman.cl';
 		var port='80';
         var opcionesMapa = {
-            zoom: 2,
+            zoom: 7,
             maxZoom: 20,
             minZoom: 2,
             streetViewControl: false,
@@ -226,7 +236,7 @@ var App=function(opciones){
             mapTypeControl:false
         };
         this.mapa.init(opcionesMapa,opciones.contenedorMapa);
- 		this.mapa.centrar(new google.maps.LatLng(0,0));
+ 		this.mapa.centrar(new google.maps.LatLng(-20.2167,-70.1500));
         
         for (i=0;i < listas.length;i++){
         	this.sismos.push({
@@ -279,7 +289,10 @@ var App=function(opciones){
 	}
 	this.geolocaliza=function(sismos){
 		var html='';
+		
+	
 		for (var n=0;n < sismos.length;n++){
+			var magnitudeStr=sismos[n].magnitude.toString();
 			html='';
 			html+='<div class="marker-popup">';
 			html+='<h2>' + sismos[n].fecha + ' - ' + sismos[n].hora + '</h2>';
@@ -291,7 +304,7 @@ var App=function(opciones){
 				sismos[n].id,
 				html,
 				sismos[n].fecha + ' / ' + sismos[n].magnitude,
-				null,
+				'i' + magnitudeStr.substring(0,1),
 				false
 			)
 		}
@@ -315,7 +328,7 @@ $(document).on('ready',function(){
 	});
 	
 	//sismos en el mundo
-	listas.push({
+	/*listas.push({
 		nombre:'mundo',
 		contenedor:'#ultimos-sismos-mundo',
 		script:'social2.php',
@@ -323,7 +336,7 @@ $(document).on('ready',function(){
 		origen:'USGS',
 		callbackProcesa:procesaDatos,
 		callbackRender:render,	
-	});
+	});*/
 	var sismo=new App({contenedorMapa:$('#map_canvas'),loads:listas.length});
 	sismo.init(listas);
 	sismo.getDatos();
@@ -332,13 +345,13 @@ $(document).on('ready',function(){
 		var parcheMes = null;
 		var params=new Array();
 		var fechaISO,fechaUNIX,dateLength,parcheFecha;
-			
+
 		if(info.origen==='USGS'){
-			//TO-DO: Refactorizar. no usar $ each a no ser que sea una colección de objetos yikueri.
+			//TO-DO: Refactorizar. no usar $ each a no ser que sea una colección de objetos jquery
 			$.each(datos.features, function(e, evento) {
 				dateLength=evento.properties.time.length;
 				parcheFecha=evento.properties.time.substring(0,dateLength - 3);
-				
+
 				//BUGFIX, USGS está entregando timestamps de 13 caracteres, año 45007
 					cuando = new Date(parcheFecha * 1000);
 					parcheMes = cuando.getMonth() + 1;
@@ -354,19 +367,16 @@ $(document).on('ready',function(){
 						depth:evento.geometry.coordinates[2],
 						url:evento.properties.url
 					};
-					listaSismos.agrega(params);		
-		
+					listaSismos.agrega(params);
 			});
 		}
-		
+
 		if(info.origen==='JUNAR'){
 			var params=new Array();
 			var url=null;
 			for (var i=datos.result.fArray.length -1; i > 7 ;i -= 8){
-				fechaISO=dateFormat(datos.result.fArray[i-7].fStr,"yyyy-mm-dd'T'HH:MM:ss");
-				fechaISO=new Date(fechaISO);
-				fechaUNIX=parseInt(fechaISO.getTime() / 1000);
-				
+				fecha=new Date(dateFormat(datos.result.fArray[i-7].fStr,"yyyy-mm-dd HH:MM:ss"));
+				fechaUNIX=parseInt(fecha.getTime() / 1000);
 				params.push({
 					id:fechaUNIX,
 					hora:dateFormat(datos.result.fArray[i-7].fStr,'H:MM:ss'),
@@ -376,12 +386,12 @@ $(document).on('ready',function(){
 					nearOfCity:datos.result.fArray[i].fStr,
 					magnitude:parseFloat(datos.result.fArray[i-2].fStr),
 					depth:datos.result.fArray[i-3].fStr,
-					url:'#'					
-				});		
+					url:'#'
+				});
 			}
 			//LIFO
 			for (var i=params.length -1;i >= 0; i-=1){
-				listaSismos.agrega(params[i]);	
+				listaSismos.agrega(params[i]);
 			}
 		}
 		if (info.done == info.loads){
@@ -425,6 +435,7 @@ $(document).on('ready',function(){
 				is.push(ds[i][j].id);
 			}
 		}
+
 		fechamax=Math.max.apply(Math,is);
 		fechamin=Math.min.apply(Math,is);
 		$("#slider").slider({
@@ -434,10 +445,10 @@ $(document).on('ready',function(){
 			value: fechamax,
 			slide: function( event, ui ) {
 					$('#fecha-slider').text(dateFormat(new Date(ui.value * 1000),"dd/mm/yyyy - HH:MM:ss" ));
-					sismo.getMapa().markersVisible(ui.value);				
+					sismo.getMapa().markersVisible(ui.value);
 			}
 		}); 	
-		$('#fecha-slider').text(dateFormat(new Date(fechamax * 1000),"dd/mm/yyyy - HH:MM:ss" ) + ' (controla los sismos que se muestran en el mapa, moviendo el slider)');
+		$('#fecha-slider').text(dateFormat(new Date(fechamax * 1000),"dd/mm/yyyy - HH:MM:ss" ) + ' (Filtra por hora)');
 	}
 
 });

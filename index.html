@@ -16,6 +16,7 @@
 				<a href="#"><h1>Alerta Sismos <span><sup>beta</sup></span></h1></a>
 			</div>
 		</header>
+
 		<section id="mapa">
 			<div id="cuek-alert">
 				<p id="fecha-slider"></p>
@@ -24,33 +25,24 @@
 			</div>
 			<div id="map_canvas">
 			</div>
-
-
 		</section>
-		<script>
+					<div style="padding-left:10px">
+						<section id="lista-sismos-shile" class=" lista ">
+							<!-- Lista de ultimos sismos en shile-->
 
-	
 
-</script>
-		<div class="contenedor">
-			<section id="lista-sismos-shile" class=" lista grid-8">
-				<!-- Lista de ultimos sismos en shile-->
+							<ul id="ultimos-sismos-shile" class="t-menu grid-16">
+								<!--ACA VAN LOS DATOS-->
+							</ul>
+						</section>
+					</div>
 
-				<div class="lista-descripcion">
-					<h2>Ultimos sismos en Chile</h2>
-					<p>
-						la información proviene de: <a href="http://jaimeguaman.opendata.junar.com/datastreams/75075/sismos-chile">Junar (Sismología U. de Chile)</a>
-					</p>
-					<p>
-						Medición: Richter (ML)
-					</p>
-				</div>
-				<ul id="ultimos-sismos-shile" class="t-menu grid-16">
-					<!--ACA VAN LOS DATOS-->
-				</ul>
-			</section>
-			<section id="lista-sismos-mundo" class=" lista grid-8" >
-				<!-- Lista de ultimos sismos en el mundo-->
+
+
+
+
+			<!--<section id="lista-sismos-mundo" class=" lista grid-8" >
+				
 				<div class="lista-descripcion">
 					<h2>Ultimos sismos en el mundo</h2>
 					<p>
@@ -61,15 +53,15 @@
 					</p>
 				</div>
 				<ul id="ultimos-sismos-mundo" class="t-menu grid-16">
-					<!--ACA VAN LOS DATOS-->
+					
 				</ul>
-			</section>
+			</section>-->
 		</div>
 		<footer class="row">
 			<a href="https://github.com/jaimeguaman/alerta-sismos">GitHub</a>
 		</footer>
 		<script type="text/javascript" src="https://maps.google.com/maps/api/js?sensor=false"></script>
-		<script type="text/javascript" src="javascripts/app.js?21012013"></script>
+		<script type="text/javascript" src="javascripts/app.js?20140403"></script>
 		<script type="text/javascript">
 			var _gaq = _gaq || [];
 			_gaq.push(['_setAccount', 'UA-27439178-1']);
